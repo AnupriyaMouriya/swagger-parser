@@ -66,6 +66,23 @@ public class OpenAPIV3ParserTest {
     protected int serverPort = getDynamicPort();
     protected WireMockServer wireMockServer;
 
+
+    @Test
+    public void testIssueFlattenComposedSchemaAtComponents() {
+        OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setFlatten(true);
+        options.setFlattenComposedSchemas(true);
+        SwaggerParseResult parseResult = openApiParser.readLocation("FlattenComposedSchemasAtComponents.yaml", null, options);
+
+        OpenAPI openAPI = parseResult.getOpenAPI();
+        assertNotNull(openAPI);
+        assertEquals(((ComposedSchema)openAPI.getComponents().getSchemas().get("contact-base-model")).getAllOf().get(1).get$ref(),"#/components/schemas/Components_contactbasemodel");
+        assertEquals(((ComposedSchema)openAPI.getComponents().getSchemas().get("Test")).getOneOf().get(1).get$ref(),"#/components/schemas/Components_Test");
+
+    }
+
     @Test
     public void testIssue1309() {
         OpenAPIV3Parser openApiParser = new OpenAPIV3Parser();

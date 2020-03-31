@@ -258,6 +258,7 @@ public class InlineModelResolver {
                     }
                 } else if (model instanceof ComposedSchema) {
                     ComposedSchema composedSchema = (ComposedSchema) model;
+
                     List<Schema> list = null;
                     if (composedSchema.getAllOf() != null) {
                       list  = composedSchema.getAllOf();
@@ -266,15 +267,27 @@ public class InlineModelResolver {
                     }else if (composedSchema.getOneOf() != null) {
                         list  = composedSchema.getOneOf();
                     }
+
                     for(int i= 0; i<list.size();i++){
-                        if(list.get(i).getProperties()!= null){
-                            flattenProperties(list.get(i).getProperties(), modelName);
+                        if(list.get(i).get$ref() == null){
+                            Schema inline = list.get(i);
+                            if(inline.getProperties()!= null){
+                                flattenProperties(inline.getProperties(), modelName);
+                            }
+                            String inlineModelName = resolveModelName(inline.getTitle(), "Components"+"_"+ modelName);
+                            list.add(new Schema().$ref(inlineModelName));
+                            list.remove(i);
+                            addGenerated(inlineModelName, inline);
+                            openAPI.getComponents().addSchemas(inlineModelName, inline);
+
                         }
                     }
                 }
             }
         }
     }
+
+
 
     /**
      * This function fix models that are string (mostly enum). Before this fix, the example
@@ -336,6 +349,7 @@ public class InlineModelResolver {
         }
         return key;
     }
+
 
     public void flattenProperties(Map<String, Schema> properties, String path) {
         if (properties == null) {
