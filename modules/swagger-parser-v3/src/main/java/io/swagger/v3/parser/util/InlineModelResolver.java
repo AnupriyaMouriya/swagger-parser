@@ -274,11 +274,13 @@ public class InlineModelResolver {
                             if(inline.getProperties()!= null){
                                 flattenProperties(inline.getProperties(), modelName);
                             }
-                            String inlineModelName = resolveModelName(inline.getTitle(), "Components"+"_"+ modelName);
-                            list.add(new Schema().$ref(inlineModelName));
-                            list.remove(i);
-                            addGenerated(inlineModelName, inline);
-                            openAPI.getComponents().addSchemas(inlineModelName, inline);
+                            if (this.flattenComposedSchemas) {
+                                String inlineModelName = resolveModelName(inline.getTitle(), "Components" + "_" + modelName);
+                                list.add(new Schema().$ref(inlineModelName));
+                                list.remove(i);
+                                addGenerated(inlineModelName, inline);
+                                openAPI.getComponents().addSchemas(inlineModelName, inline);
+                            }
 
                         }
                     }
